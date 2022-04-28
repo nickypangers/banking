@@ -2,6 +2,7 @@ package domain
 
 import (
 	"database/sql"
+	"os"
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -55,7 +56,9 @@ func (d CustomerRepositoryDb) ById(id string) (*Customer, *errs.AppError) {
 }
 
 func NewCustomerRepositoryDb() CustomerRepositoryDb {
-	client, err := sqlx.Open("mysql", "root:password@/banking")
+	root := os.Getenv("MYSQL_ROOT_USER")
+	password := os.Getenv("MYSQL_ROOT_PASSWORD")
+	client, err := sqlx.Open("mysql", root+":"+password+"@/banking")
 	if err != nil {
 		panic(err)
 	}
