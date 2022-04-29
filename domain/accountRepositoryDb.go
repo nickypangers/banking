@@ -30,6 +30,36 @@ func (d AccountRepositoryDb) ById(customerId, accountId string) (*Account, *errs
 	return &a, nil
 }
 
+func (d AccountRepositoryDb) UpdateAmount(a Account) (*Account, *errs.AppError) {
+
+	sqlUpdate := "UPDATE accounts SET amount = ? WHERE customer_id = ? AND account_id = ?"
+
+	result, err := d.client.Exec(sqlUpdate, a.Amount, a.CustomerId, a.AccountId)
+	if err != nil {
+		logger.Error("Error while updating account " + err.Error())
+		return nil, errs.NewUnexpectedNotFoundError("Unexpected server error")
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		logger.Error("Error while updating account " + err.Error())
+		return nil, errs.NewUnexpectedNotFoundError("Unexpected server error")
+	}
+
+	if rowsAffected == 0 {
+		logger.Error("Error while updating account " + err.Error())
+		return nil, errs.NewNotFoundError("Account not found")
+	}
+
+	newA, appError := d.ById(a.CustomerId, a.AccountId)
+	if appError != nil {
+		return nil, appError
+	}
+
+	return newA, nil
+
+}
+
 func (d AccountRepositoryDb) Save(a Account) (*Account, *errs.AppError) {
 
 	sqlInsert := "INSERT INTO accounts (customer_id, opening_date, account_type, amount, status) VALUES (?, ?, ?, ?, ?)"

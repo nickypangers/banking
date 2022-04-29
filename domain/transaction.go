@@ -1,6 +1,9 @@
 package domain
 
-import "github.com/nickypangers/banking/errs"
+import (
+	"github.com/nickypangers/banking/dto"
+	"github.com/nickypangers/banking/errs"
+)
 
 type Transaction struct {
 	TransactionId   string `db:"transaction_id"`
@@ -11,5 +14,12 @@ type Transaction struct {
 }
 
 type TransactionRepository interface {
-	Deposit(Transaction) (*Transaction, *errs.AppError)
+	Save(Transaction) (*Transaction, *errs.AppError)
+}
+
+func (t Transaction) ToNewTransactionResponseDto() dto.NewTransactionResponse {
+	return dto.NewTransactionResponse{
+		TransactionId:   t.TransactionId,
+		TransactionDate: t.TransactionDate,
+	}
 }
