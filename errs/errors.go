@@ -21,6 +21,13 @@ func NewNotFoundError(message string) *AppError {
 	}
 }
 
+func NewValidationError(message string) *AppError {
+	return &AppError{
+		Code:    http.StatusUnprocessableEntity,
+		Message: message,
+	}
+}
+
 func (e *AppError) AsMessage() AppError {
 	return AppError{
 		Message: e.Message,

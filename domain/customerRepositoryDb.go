@@ -2,8 +2,6 @@ package domain
 
 import (
 	"database/sql"
-	"os"
-	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
@@ -55,17 +53,7 @@ func (d CustomerRepositoryDb) ById(id string) (*Customer, *errs.AppError) {
 
 }
 
-func NewCustomerRepositoryDb() CustomerRepositoryDb {
-	root := os.Getenv("MYSQL_ROOT_USER")
-	password := os.Getenv("MYSQL_ROOT_PASSWORD")
-	client, err := sqlx.Open("mysql", root+":"+password+"@/banking")
-	if err != nil {
-		panic(err)
-	}
-	// See "Important settings" section.
-	client.SetConnMaxLifetime(time.Minute * 3)
-	client.SetMaxOpenConns(10)
-	client.SetMaxIdleConns(10)
+func NewCustomerRepositoryDb(dbClient *sqlx.DB) CustomerRepositoryDb {
 
-	return CustomerRepositoryDb{client}
+	return CustomerRepositoryDb{dbClient}
 }
