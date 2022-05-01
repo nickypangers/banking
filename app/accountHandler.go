@@ -56,3 +56,27 @@ func (ah *AccountHandler) NewAccount(w http.ResponseWriter, r *http.Request) {
 
 	writeResponse(w, http.StatusCreated, account)
 }
+
+func (ah *AccountHandler) MakeTransaction(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	customerId := vars["customer_id"]
+	accountId := vars["account_id"]
+
+	var request dto.TransactionRequest
+	err := json.NewDecoder(r.Body).Decode(&request)
+	if err != nil {
+		writeResponse(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	request.AccountId = accountId
+	request.CustomerId = customerId
+
+	account, appError := ah.service.MakeTransaction(request)
+	if appError != nil {
+		writeResponse(w, appError.Code, appError.AsMessage())
+		return
+	}
+
+	writeResponse(w, http.StatusOK, account)
+}

@@ -29,18 +29,15 @@ func Start() {
 	dbClient := getDBClient()
 	customerRepositoryDb := domain.NewCustomerRepositoryDb(dbClient)
 	accountRepositoryDb := domain.NewAccountRepositoryDb(dbClient)
-	transactionRepositoryDb := domain.NewTransactionRepositoryDb(dbClient)
 	ch := CustomerHandler{service.NewCustomerService(customerRepositoryDb)}
 	ah := AccountHandler{service.NewAccountService(accountRepositoryDb)}
-	th := TransactionHandler{service.NewTransactionService(transactionRepositoryDb)}
 
 	router.HandleFunc("/customers", ch.getAllCustomers).Methods(http.MethodGet)
 	router.HandleFunc("/customers/{customer_id:[0-9]+}", ch.getCustomer).Methods(http.MethodGet)
 
-	router.HandleFunc("/customers/{customer_id:[0-9]+}/accounts/{account_id:[0-9]+}", ah.GetAccount).Methods(http.MethodGet)
-	router.HandleFunc("/customers/{customer_id:[0-9]+}/accounts", ah.NewAccount).Methods(http.MethodPost)
-
-	router.HandleFunc("/customers/{customer_id:[0-9]+}/accounts/{account_id:[0-9]+}/deposit", th.Deposit).Methods(http.MethodPost)
+	router.HandleFunc("/customers/{customer_id:[0-9]+}/account", ah.NewAccount).Methods(http.MethodPost)
+	router.HandleFunc("/customers/{customer_id:[0-9]+}/account/{account_id:[0-9]+}", ah.GetAccount).Methods(http.MethodGet)
+	router.HandleFunc("/customers/{customer_id:[0-9]+}/account/{account_id:[0-9]+}", ah.MakeTransaction).Methods(http.MethodPost)
 
 	address := os.Getenv("SERVER_ADDRESS")
 	port := os.Getenv("SERVER_PORT")

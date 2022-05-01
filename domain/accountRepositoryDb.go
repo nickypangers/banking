@@ -13,11 +13,11 @@ type AccountRepositoryDb struct {
 	client *sqlx.DB
 }
 
-func (d AccountRepositoryDb) ById(customerId, accountId string) (*Account, *errs.AppError) {
-	accountSql := "select * from accounts where customer_id = ? AND account_id = ?"
+func (d AccountRepositoryDb) ById(accountId string) (*Account, *errs.AppError) {
+	accountSql := "select * from accounts where account_id = ?"
 
 	var a Account
-	err := d.client.Get(&a, accountSql, customerId, accountId)
+	err := d.client.Get(&a, accountSql, accountId)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			logger.Error("Error while scanning account " + err.Error())
@@ -28,36 +28,6 @@ func (d AccountRepositoryDb) ById(customerId, accountId string) (*Account, *errs
 		return nil, errs.NewUnexpectedNotFoundError("Unexpected server error")
 	}
 	return &a, nil
-}
-
-func (d AccountRepositoryDb) UpdateAmount(a Account) (*Account, *errs.AppError) {
-
-	sqlUpdate := "UPDATE accounts SET amount = ? WHERE customer_id = ? AND account_id = ?"
-
-	result, err := d.client.Exec(sqlUpdate, a.Amount, a.CustomerId, a.AccountId)
-	if err != nil {
-		logger.Error("Error while updating account " + err.Error())
-		return nil, errs.NewUnexpectedNotFoundError("Unexpected server error")
-	}
-
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		logger.Error("Error while updating account " + err.Error())
-		return nil, errs.NewUnexpectedNotFoundError("Unexpected server error")
-	}
-
-	if rowsAffected == 0 {
-		logger.Error("Error while updating account " + err.Error())
-		return nil, errs.NewNotFoundError("Account not found")
-	}
-
-	newA, appError := d.ById(a.CustomerId, a.AccountId)
-	if appError != nil {
-		return nil, appError
-	}
-
-	return newA, nil
-
 }
 
 func (d AccountRepositoryDb) Save(a Account) (*Account, *errs.AppError) {
@@ -77,6 +47,47 @@ func (d AccountRepositoryDb) Save(a Account) (*Account, *errs.AppError) {
 	}
 	a.AccountId = strconv.FormatInt(id, 10)
 	return &a, nil
+}
+
+func (d AccountRepositoryDb) SaveTransaction(t Transaction) (*Transaction, *errs.AppError) {
+	tx, err := d.client.Begin()
+	if err != nil {
+		logger.Error("Error while starting a new transaction: " + err.Error())
+		return nil, errs.NewUnexpectedNotFoundError("Unexpected server error")
+	}
+
+	result, _ := tx.Exec("INSERT INTO transactions (account_id, amount, transaction_type, transaction_date) values (?, ?, ?, ?)", t.AccountId, t.Amount, t.TransactionType, t.TransactionDate)
+	if err != nil {
+		logger.Error("Error while saving transaction " + err.Error())
+		return nil, errs.NewUnexpectedNotFoundError("Unexpected server error")
+	}
+	if t.IsWithdrawal() {
+		_, err = tx.Exec("UPDATE accounts SET amount = amount - ? WHERE account_id = ?", t.Amount, t.AccountId)
+	} else {
+		_, err = tx.Exec("UPDATE accounts SET amount = amount + ? WHERE account_id = ?", t.Amount, t.AccountId)
+	}
+	if err != nil {
+		tx.Rollback()
+		logger.Error("Error while saving transaction " + err.Error())
+		return nil, errs.NewUnexpectedNotFoundError("Unexpected server error")
+	}
+
+	transactionId, err := result.LastInsertId()
+	if err != nil {
+		logger.Error("Error while getting last insert transaction id " + err.Error())
+		return nil, errs.NewUnexpectedNotFoundError("Unexpected server error")
+	}
+
+	account, appErr := d.ById(t.AccountId)
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	t.TransactionId = strconv.FormatInt(transactionId, 10)
+
+	t.Amount = account.Amount
+	return &t, nil
+
 }
 
 func NewAccountRepositoryDb(dbClient *sqlx.DB) AccountRepositoryDb {
