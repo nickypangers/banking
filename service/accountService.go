@@ -8,6 +8,7 @@ import (
 	"github.com/nickypangers/banking/errs"
 )
 
+//go:generate mockgen -destination=../mocks/service/mockAccountService.go -package=service github.com/nickypangers/banking/service AccountService
 type AccountService interface {
 	NewAccount(dto.NewAccountRequest) (*dto.NewAccountResponse, *errs.AppError)
 	GetAccount(string, string) (*dto.AccountResponse, *errs.AppError)

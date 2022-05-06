@@ -10,7 +10,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/jmoiron/sqlx"
 	"github.com/nickypangers/banking/domain"
-	service "github.com/nickypangers/banking/services"
+	service "github.com/nickypangers/banking/service"
 )
 
 func sanityCheck() {

@@ -6,7 +6,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/nickypangers/banking/dto"
-	service "github.com/nickypangers/banking/services"
+	service "github.com/nickypangers/banking/service"
 )
 
 type AccountHandler struct {

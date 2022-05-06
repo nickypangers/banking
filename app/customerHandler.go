@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
-	service "github.com/nickypangers/banking/services"
+	service "github.com/nickypangers/banking/service"
 )
 
 type CustomerHandler struct {
