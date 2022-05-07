@@ -43,6 +43,7 @@ func (a Account) CanWithdraw(amount float64) bool {
 	return a.Amount >= amount
 }
 
+//go:generate mockgen -destination=../mocks/service/mockAccountRepository.go -package=domain github.com/nickypangers/banking/domain AccountRepository
 type AccountRepository interface {
 	Save(Account) (*Account, *errs.AppError)
 	ById(string) (*Account, *errs.AppError)

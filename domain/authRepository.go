@@ -32,7 +32,7 @@ func (r RemoteAuthRepository) IsAuthorized(token, routeName string, vars map[str
 }
 
 func buildVerifyURL(token string, routeName string, vars map[string]string) string {
-	u := url.URL{Host: "localhost:9091", Path: "/auth/verify", Scheme: "http"}
+	u := url.URL{Host: "localhost:9191", Path: "/auth/verify", Scheme: "http"}
 	q := u.Query()
 	q.Add("token", token)
 	q.Add("routeName", routeName)
