@@ -2,8 +2,8 @@ package main
 
 import (
 	"github.com/joho/godotenv"
+	"github.com/nickypangers/banking-lib/logger"
 	"github.com/nickypangers/banking/app"
-	"github.com/nickypangers/banking/logger"
 )
 
 func main() {

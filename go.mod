@@ -10,6 +10,8 @@ require (
 	go.uber.org/zap v1.21.0
 )
 
+require github.com/nickypangers/banking-lib v1.0.0 // indirect
+
 require (
 	github.com/golang/mock v1.6.0
 	go.uber.org/atomic v1.9.0 // indirect

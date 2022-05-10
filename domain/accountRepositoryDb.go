@@ -5,8 +5,8 @@ import (
 	"strconv"
 
 	"github.com/jmoiron/sqlx"
-	"github.com/nickypangers/banking/errs"
-	"github.com/nickypangers/banking/logger"
+	"github.com/nickypangers/banking-lib/errs"
+	"github.com/nickypangers/banking-lib/logger"
 )
 
 type AccountRepositoryDb struct {

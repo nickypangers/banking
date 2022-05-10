@@ -17,6 +17,8 @@ type RemoteAuthRepository struct {
 func (r RemoteAuthRepository) IsAuthorized(token, routeName string, vars map[string]string) bool {
 	u := buildVerifyURL(token, routeName, vars)
 
+	fmt.Println(u)
+
 	if response, err := http.Get(u); err != nil {
 		fmt.Println("Error while sending..." + err.Error())
 		return false
